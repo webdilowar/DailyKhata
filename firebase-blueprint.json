@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile in the application",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 150 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["email"]
+    },
+    "Account": {
+      "title": "Account",
+      "description": "User financial account (Cash, Bank, bKash, etc.)",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 60 },
+        "type": { "type": "string", "maxLength": 40 },
+        "icon": { "type": "string", "maxLength": 40 },
+        "color": { "type": "string", "maxLength": 30 },
+        "initialBalance": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "description": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "initialBalance", "currency"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Transaction category for income or expense",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 60 },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "icon": { "type": "string", "maxLength": 40 },
+        "color": { "type": "string", "maxLength": 30 },
+        "isDefault": { "type": "boolean" },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "type"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Individual financial record (income, expense, or transfer)",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["income", "expense", "transfer"] },
+        "amount": { "type": "number" },
+        "accountId": { "type": "string", "maxLength": 128 },
+        "categoryId": { "type": "string", "maxLength": 128 },
+        "fromAccountId": { "type": "string", "maxLength": 128 },
+        "toAccountId": { "type": "string", "maxLength": 128 },
+        "note": { "type": "string", "maxLength": 500 },
+        "date": { "type": "string", "maxLength": 40 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["type", "amount", "date"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "Monthly category budget target",
+      "type": "object",
+      "properties": {
+        "month": { "type": "string", "maxLength": 10 },
+        "categoryId": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["month", "categoryId", "amount"]
+    },
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "Preferences and display configurations for user",
+      "type": "object",
+      "properties": {
+        "currency": { "type": "string", "maxLength": 10 },
+        "theme": { "type": "string", "enum": ["dark", "light", "system"] },
+        "dateFormat": { "type": "string", "maxLength": 20 },
+        "firstDayOfWeek": { "type": "string", "enum": ["sunday", "monday", "saturday"] },
+        "defaultAccountId": { "type": "string", "maxLength": 128 },
+        "defaultTransactionType": { "type": "string", "enum": ["expense", "income", "transfer"] },
+        "confirmBeforeDelete": { "type": "boolean" },
+        "startScreen": { "type": "string", "maxLength": 20 },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "TallyContact": {
+      "title": "TallyContact",
+      "description": "Customer or supplier for TallyKhata credit/debit tracking",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "type": { "type": "string", "enum": ["customer", "supplier"] },
+        "openingBalance": { "type": "number" },
+        "currentBalance": { "type": "number" },
+        "address": { "type": "string", "maxLength": 200 },
+        "note": { "type": "string", "maxLength": 500 },
+        "lastActiveAt": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "type"]
+    },
+    "TallyTransaction": {
+      "title": "TallyTransaction",
+      "description": "Credit/Debit entry for a TallyKhata contact (gave or received)",
+      "type": "object",
+      "properties": {
+        "contactId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["gave", "received"] },
+        "amount": { "type": "number" },
+        "description": { "type": "string", "maxLength": 500 },
+        "date": { "type": "string", "maxLength": 40 },
+        "receiptUrl": { "type": "string", "maxLength": 500 },
+        "sendSms": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["contactId", "type", "amount", "date"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Main user document"
+    },
+    "/users/{userId}/accounts/{accountId}": {
+      "schema": "Account",
+      "description": "Subcollection of financial accounts owned by the user"
+    },
+    "/users/{userId}/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Subcollection of categories owned by the user"
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Subcollection of transactions owned by the user"
+    },
+    "/users/{userId}/budgets/{budgetId}": {
+      "schema": "Budget",
+      "description": "Subcollection of monthly budget targets owned by the user"
+    },
+    "/users/{userId}/settings/{settingId}": {
+      "schema": "UserSettings",
+      "description": "User preference settings documents"
+    },
+    "/users/{userId}/tally_contacts/{contactId}": {
+      "schema": "TallyContact",
+      "description": "Subcollection of customers and suppliers in TallyKhata"
+    },
+    "/users/{userId}/tally_transactions/{tallyTxId}": {
+      "schema": "TallyTransaction",
+      "description": "Subcollection of credit/debit transactions for contacts"
+    }
+  }
+}

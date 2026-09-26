@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Public lookup index for phone-to-account mapping across devices
+    match /phone_index/{phone} {
+      allow read: if true;
+      allow create, update: if isSignedIn();
+      allow delete: if isSignedIn();
+    }
+
+    // User document and isolated subcollections
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // Accounts subcollection
+      match /accounts/{accountId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(accountId);
+        allow update: if isOwner(userId) && isValidId(accountId);
+        allow delete: if isOwner(userId) && isValidId(accountId);
+      }
+
+      // Categories subcollection
+      match /categories/{categoryId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(categoryId);
+        allow update: if isOwner(userId) && isValidId(categoryId);
+        allow delete: if isOwner(userId) && isValidId(categoryId);
+      }
+
+      // Transactions subcollection
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(transactionId);
+        allow update: if isOwner(userId) && isValidId(transactionId);
+        allow delete: if isOwner(userId) && isValidId(transactionId);
+      }
+
+      // Budgets subcollection
+      match /budgets/{budgetId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(budgetId);
+        allow update: if isOwner(userId) && isValidId(budgetId);
+        allow delete: if isOwner(userId) && isValidId(budgetId);
+      }
+
+      // Settings subcollection
+      match /settings/{settingId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(settingId);
+        allow update: if isOwner(userId) && isValidId(settingId);
+        allow delete: if isOwner(userId) && isValidId(settingId);
+      }
+
+      // Tally Khata Contacts (Customers & Suppliers)
+      match /tally_contacts/{contactId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(contactId);
+        allow update: if isOwner(userId) && isValidId(contactId);
+        allow delete: if isOwner(userId) && isValidId(contactId);
+      }
+
+      // Tally Khata Transactions (দিলাম / পেলাম)
+      match /tally_transactions/{tallyTxId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(tallyTxId);
+        allow update: if isOwner(userId) && isValidId(tallyTxId);
+        allow delete: if isOwner(userId) && isValidId(tallyTxId);
+      }
+    }
+  }
+}
